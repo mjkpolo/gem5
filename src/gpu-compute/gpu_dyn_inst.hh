@@ -480,6 +480,11 @@ class GPUDynInst : public GPUExecContext
     bool isSystemReq() { return systemReq; }
     void setSystemReq() { systemReq = true; }
 
+    // Pseudo instruction related methods
+    bool isPseudoInst() const { return _pseudoInstNum != 0; }
+    void setPseudoInst(int num) { _pseudoInstNum = num; }
+    int getPseudoInst() const { return _pseudoInstNum; }
+
   private:
     GPUStaticInst *_staticInst;
     const InstSeqNum _seqNum;
@@ -497,6 +502,9 @@ class GPUDynInst : public GPUExecContext
     // hold each cache block address for the instruction and a vector
     // to hold the tick when the block arrives at certain hop points
     std::map<Addr, std::vector<Tick>> lineAddressTime;
+
+    // Non-zero implies this is a gem5 pseudo instruction
+    int _pseudoInstNum = 0;
 };
 
 } // namespace gem5

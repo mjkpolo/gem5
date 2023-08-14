@@ -294,6 +294,11 @@ class GPUStaticInst : public GPUStaticInstFlags
     typedef int (RegisterManager::*MapRegFn)(Wavefront *, int);
     enum OpType { SRC_VEC, SRC_SCALAR, DST_VEC, DST_SCALAR };
 
+    // Pseudo instruction related methods
+    bool isPseudoInst() const { return _pseudoInstNum != 0; }
+    void setPseudoInst(int num) { _pseudoInstNum = num; }
+    int getPseudoInst() const { return _pseudoInstNum; }
+
   protected:
     const std::string _opcode;
     std::string disassembly;
@@ -320,6 +325,9 @@ class GPUStaticInst : public GPUStaticInstFlags
     int _ipdInstNum;
 
     std::bitset<Num_Flags> _flags;
+
+    // Non-zero implies this is a gem5 pseudo instruction
+    int _pseudoInstNum = 0;
 };
 
 class KernelLaunchStaticInst : public GPUStaticInst

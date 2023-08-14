@@ -296,6 +296,11 @@ class Wavefront : public SimObject
     bool hasBarrier() const;
     void releaseBarrier();
 
+    bool isNextInstPseudoInst() const;
+    void setNextInstIsPseudoInst(int num);
+    int getNextInstPseudoInst() const;
+    void clearNextInstIsPseudoInst();
+
   private:
     TheGpuISA::GPUISA _gpuISA;
 
@@ -329,6 +334,8 @@ class Wavefront : public SimObject
     Addr _pc;
     VectorMask _execMask;
     int barId;
+
+    int _nextInstPseudoInst = 0;
 
   public:
     struct WavefrontStats : public statistics::Group

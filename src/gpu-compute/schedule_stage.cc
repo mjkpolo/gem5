@@ -34,6 +34,7 @@
 #include <unordered_set>
 
 #include "base/compiler.hh"
+#include "debug/GPUPseudoInst.hh"
 #include "debug/GPUSched.hh"
 #include "debug/GPUVRF.hh"
 #include "gpu-compute/compute_unit.hh"
@@ -150,6 +151,16 @@ ScheduleStage::exec()
                 wf->incExpInstsIssued();
             }
         }
+
+        // Handle pseudo instructions
+        if (wf->isNextInstPseudoInst()) {
+            DPRINTF(GPUPseudoInst, "Instruction %s is a pseudo instruction: "
+                    "%x\n", gpu_dyn_inst->disassemble().c_str(),
+                    wf->getNextInstPseudoInst());
+
+            gpu_dyn_inst->setPseudoInst(wf->getNextInstPseudoInst());
+            wf->clearNextInstIsPseudoInst();
+        }
     }
 
     // Iterate everything else
@@ -176,6 +187,30 @@ ScheduleStage::exec()
             // this wave spends in SCH stage.
             wf->stats.schCycles++;
             stats.addToSchListStalls[j]++;
+        }
+
+        // Handle pseudo instructions
+        if (wf->isNextInstPseudoInst()) {
+            DPRINTF(GPUPseudoInst, "Instruction %s is a pseudo instruction: "
+                    "%x\n", gpu_dyn_inst->disassemble().c_str(),
+                    wf->getNextInstPseudoInst());
+
+            gpu_dyn_inst->setPseudoInst(wf->getNextInstPseudoInst());
+            wf->clearNextInstIsPseudoInst();
+        }
+
+        // S_TRAP used for pseudo instructions falls into this loop.
+        // Set that the next wavefront instruction will be a pseudo
+        // instruction after the check above. Need to check the static
+        // instruction here as the dynamic instruction will not be set yet.
+        if (gpu_dyn_inst->staticInstruction()->isPseudoInst()) {
+            int pseudo_inst_num =
+                gpu_dyn_inst->staticInstruction()->getPseudoInst();
+
+            DPRINTF(GPUPseudoInst, "Setting next wavefront instruction"
+                    " to be pseudo instruction: %x\n", pseudo_inst_num);
+
+            wf->setNextInstIsPseudoInst(pseudo_inst_num);
         }
     }
 

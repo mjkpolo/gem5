@@ -1468,6 +1468,30 @@ Wavefront::releaseBarrier()
     barId = WFBarrier::InvalidID;
 }
 
+bool
+Wavefront::isNextInstPseudoInst() const
+{
+    return _nextInstPseudoInst != 0;
+}
+
+void
+Wavefront::setNextInstIsPseudoInst(int num)
+{
+    _nextInstPseudoInst = num;
+}
+
+int
+Wavefront::getNextInstPseudoInst() const
+{
+    return _nextInstPseudoInst;
+}
+
+void
+Wavefront::clearNextInstIsPseudoInst()
+{
+    _nextInstPseudoInst = 0;
+}
+
 Wavefront::WavefrontStats::WavefrontStats(statistics::Group *parent)
     : statistics::Group(parent),
       ADD_STAT(numInstrExecuted,

@@ -35,6 +35,7 @@
 
 #include "arch/amdgpu/vega/insts/inst_util.hh"
 #include "debug/VEGA.hh"
+#include "debug/GPUPseudoInst.hh"
 #include "debug/GPUSync.hh"
 #include "dev/amdgpu/hwreg_defines.hh"
 #include "gpu-compute/shader.hh"
@@ -4787,6 +4788,15 @@ namespace VegaISA
     Inst_SOPP__S_TRAP::Inst_SOPP__S_TRAP(InFmt_SOPP *iFmt)
         : Inst_SOPP(iFmt, "s_trap")
     {
+        setFlag(ALU);
+
+        // Only bits 7:0 are set for a real trap, so we can use bit 15 to
+        // indicate a gem5 pseudo instruction and a real trap otherwise.
+        if (bits(instData.SIMM16, 15)) {
+            setPseudoInst(instData.SIMM16);
+            DPRINTF(GPUPseudoInst, "Setting wavefront next pseudo inst to "
+                    "%x\n", instData.SIMM16);
+        }
     } // Inst_SOPP__S_TRAP
 
     Inst_SOPP__S_TRAP::~Inst_SOPP__S_TRAP()
@@ -4807,7 +4817,11 @@ namespace VegaISA
     void
     Inst_SOPP__S_TRAP::execute(GPUDynInstPtr gpuDynInst)
     {
-        panicUnimplemented();
+        // Only bits 7:0 are set for a real trap, so we can use bit 15 to
+        // indicate a gem5 pseudo instruction and a real trap otherwise.
+        if (!bits(instData.SIMM16, 15)) {
+            panicUnimplemented();
+        }
     } // execute
     // --- Inst_SOPP__S_ICACHE_INV class methods ---
 
