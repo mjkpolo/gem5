@@ -38,6 +38,7 @@
 #include "base/chunk_generator.hh"
 #include "debug/GPUAgentDisp.hh"
 #include "debug/GPUDisp.hh"
+#include "debug/GPUInstTestTrace.hh"
 #include "debug/GPUMem.hh"
 #include "debug/GPUShader.hh"
 #include "debug/GPUWgLatency.hh"
@@ -92,6 +93,11 @@ Shader::Shader(const Params &p) : ClockedObject(p),
         assert(i == cuList[i]->cu_id);
         cuList[i]->shader = this;
         cuList[i]->idleCUTimeout = p.idlecu_timeout;
+    }
+
+    if (debug::GPUInstTestTrace) {
+        // gem5 seems to automatically handle closing this on exit
+        gittFile = simout.create(p.gitt_file);
     }
 }
 
@@ -536,6 +542,14 @@ RequestorID
 Shader::vramRequestorId()
 {
     return gpuCmdProc.vramRequestorId();
+}
+
+void
+Shader::writeInstTestTrace(const std::string& str) const
+{
+    if (debug::GPUInstTestTrace) {
+        ccprintf(*(gittFile->stream()), "%s", str);
+    }
 }
 
 Shader::ShaderStats::ShaderStats(statistics::Group *parent, int wf_size)

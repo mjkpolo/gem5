@@ -480,6 +480,9 @@ class GPUDynInst : public GPUExecContext
     bool isSystemReq() { return systemReq; }
     void setSystemReq() { systemReq = true; }
 
+    std::string getTestType() const;
+    std::string inst_trace;
+
   private:
     GPUStaticInst *_staticInst;
     const InstSeqNum _seqNum;

@@ -95,6 +95,10 @@ class ScalarRegisterFile : public RegisterFile
             wf->wfSlotId, wf->wfDynId, regIdx, regFile[regIdx]);
     }
 
+    void
+    logReg(Wavefront *wf, int regIdx, int asmIdx, std::stringstream& ss,
+           bool is_write) const;
+
   private:
     std::vector<ScalarRegU32> regFile;
 };

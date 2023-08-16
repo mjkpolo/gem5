@@ -32,6 +32,8 @@
 #ifndef __VECTOR_REGISTER_FILE_HH__
 #define __VECTOR_REGISTER_FILE_HH__
 
+#include <sstream>
+
 #include "arch/gpu_isa.hh"
 #include "config/the_gpu_isa.hh"
 #include "debug/GPUVRF.hh"
@@ -102,6 +104,9 @@ class VectorRegisterFile : public RegisterFile
         }
 #endif
     }
+
+    void logReg(Wavefront *wf, int regIdx, int asmIdx,
+                std::stringstream& ss, bool is_write) const;
 
   private:
     std::vector<VecRegContainer> regFile;

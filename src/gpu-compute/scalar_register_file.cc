@@ -120,4 +120,15 @@ ScalarRegisterFile::scheduleWriteOperandsFromLoad(Wavefront *w,
     stats.registerWrites += ii->numDstScalarDWords();
 }
 
+void
+ScalarRegisterFile::logReg(Wavefront *wf, int regIdx, int asmIdx,
+                           std::stringstream& ss, bool is_write) const
+{
+    if (is_write) {
+        ss << "\"t" << asmIdx << "\": " << regFile[regIdx] << ", ";
+    } else {
+        ss << "\"s" << asmIdx << "\": " << regFile[regIdx] << ", ";
+    }
+}
+
 } // namespace gem5

@@ -298,6 +298,11 @@ class Shader(ClockedObject):
     idlecu_timeout = Param.Tick(0, "Idle CU watchdog timeout threshold")
     max_valu_insts = Param.Int(0, "Maximum vALU insts before exiting")
 
+    gitt_file = Param.String(
+        "gem5.gitt.gz",
+        "GPU instruction test trace output file name, if enabled",
+    )
+
 
 class GPUComputeDriver(EmulatedDriver):
     type = "GPUComputeDriver"

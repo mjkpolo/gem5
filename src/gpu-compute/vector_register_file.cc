@@ -176,4 +176,32 @@ VectorRegisterFile::scheduleWriteOperandsFromLoad(
     }
 }
 
+void
+VectorRegisterFile::logReg(Wavefront *wf, int regIdx, int asmIdx,
+                           std::stringstream& ss, bool is_write) const
+{
+    const auto &vec_reg_cont = regFile[regIdx];
+    auto vgpr = vec_reg_cont.as<TheGpuISA::VecElemU32>();
+
+    // Use the letter "w" for dest registers. This is a lazy approach to
+    // determining if a register is written without more JSON.
+    if (is_write) {
+        ss << "\"w" << asmIdx << "\": [";
+    } else {
+        ss << "\"v" << asmIdx << "\": [";
+    }
+
+    for (int lane = 0; lane < TheGpuISA::NumVecElemPerVecReg; ++lane) {
+        if (wf->execMask(lane)) {
+            ss << vgpr[lane];
+        } else {
+            ss << "0";
+        }
+        if (lane != TheGpuISA::NumVecElemPerVecReg-1) {
+            ss << ", ";
+        }
+    }
+    ss << "], ";
+}
+
 } // namespace gem5

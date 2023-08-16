@@ -36,6 +36,7 @@
 
 #include "arch/amdgpu/vega/gpu_registers.hh"
 #include "arch/generic/vec_reg.hh"
+#include "debug/GPUInstTestTrace.hh"
 #include "gpu-compute/scalar_register_file.hh"
 #include "gpu-compute/vector_register_file.hh"
 #include "gpu-compute/wavefront.hh"
@@ -157,6 +158,13 @@ namespace VegaISA
 
                 DPRINTF(GPUVRF, "Read v[%d]\n", vgprIdx);
                 cu->vrf[wf->simdId]->printReg(wf, vgprIdx);
+
+                if (debug::GPUInstTestTrace) {
+                    std::stringstream ss;
+                    cu->vrf[wf->simdId]->logReg(wf, vgprIdx, _opIdx+i, ss,
+                                                false);
+                    _gpuDynInst->inst_trace += ss.str();
+                }
             }
 
             if (NumDwords == 1) {
@@ -221,6 +229,13 @@ namespace VegaISA
 
                 DPRINTF(GPUVRF, "Write v[%d]\n", vgprIdx);
                 cu->vrf[wf->simdId]->printReg(wf, vgprIdx);
+
+                if (debug::GPUInstTestTrace) {
+                    std::stringstream ss;
+                    cu->vrf[wf->simdId]->logReg(wf, vgprIdx, _opIdx, ss,
+                                                true);
+                    _gpuDynInst->inst_trace += ss.str();
+                }
             } else if (NumDwords == 2) {
                 int vgprIdx0 = cu->registerManager->mapVgpr(wf, _opIdx);
                 int vgprIdx1 = cu->registerManager->mapVgpr(wf, _opIdx + 1);
@@ -242,6 +257,15 @@ namespace VegaISA
                 DPRINTF(GPUVRF, "Write v[%d:%d]\n", vgprIdx0, vgprIdx1);
                 cu->vrf[wf->simdId]->printReg(wf, vgprIdx0);
                 cu->vrf[wf->simdId]->printReg(wf, vgprIdx1);
+
+                if (debug::GPUInstTestTrace) {
+                    std::stringstream ss;
+                    cu->vrf[wf->simdId]->logReg(wf, vgprIdx0, _opIdx, ss,
+                                                true);
+                    cu->vrf[wf->simdId]->logReg(wf, vgprIdx1, _opIdx+1, ss,
+                                                true);
+                    _gpuDynInst->inst_trace += ss.str();
+                }
             }
         }
 
@@ -418,6 +442,12 @@ namespace VegaISA
                     srfData[i] = cu->srf[wf->simdId]->read(sgprIdx);
                     DPRINTF(GPUSRF, "Read s[%d]\n", sgprIdx);
                     cu->srf[wf->simdId]->printReg(wf, sgprIdx);
+                    if (debug::GPUInstTestTrace) {
+                        std::stringstream ss;
+                        cu->srf[wf->simdId]->logReg(wf, sgprIdx, _opIdx+i,
+                                                    ss, false);
+                        _gpuDynInst->inst_trace += ss.str();
+                    }
                 }
             }
         }
@@ -478,6 +508,12 @@ namespace VegaISA
                     }
                     DPRINTF(GPUSRF, "Write s[%d]\n", sgprIdx);
                     cu->srf[wf->simdId]->printReg(wf, sgprIdx);
+                    if (debug::GPUInstTestTrace) {
+                        std::stringstream ss;
+                        cu->srf[wf->simdId]->logReg(wf, sgprIdx, _opIdx+i,
+                                                    ss, true);
+                        _gpuDynInst->inst_trace += ss.str();
+                    }
                 }
             }
         }

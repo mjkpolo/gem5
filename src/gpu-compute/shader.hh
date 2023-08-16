@@ -36,6 +36,7 @@
 #include <string>
 
 #include "arch/gpu_isa.hh"
+#include "base/output.hh"
 #include "base/statistics.hh"
 #include "base/stats/group.hh"
 #include "base/types.hh"
@@ -100,6 +101,9 @@ class Shader : public ClockedObject
     // If a kernel-based exit event was requested, wait for all CUs in the
     // shader to complete before actually exiting so that stats are updated.
     bool kernelExitRequested = false;
+
+    // Output log file for GPU instruction test trace
+    OutputStream* gittFile;
 
   public:
     typedef ShaderParams Params;
@@ -323,6 +327,8 @@ class Shader : public ClockedObject
     {
         kernelExitRequested = true;
     }
+
+    void writeInstTestTrace(const std::string& str) const;
 
   protected:
     struct ShaderStats : public statistics::Group

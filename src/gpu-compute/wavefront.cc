@@ -34,6 +34,7 @@
 #include "base/bitfield.hh"
 #include "debug/GPUExec.hh"
 #include "debug/GPUInitAbi.hh"
+#include "debug/GPUInstTestTrace.hh"
 #include "debug/WavefrontStack.hh"
 #include "gpu-compute/compute_unit.hh"
 #include "gpu-compute/gpu_dyn_inst.hh"
@@ -924,7 +925,48 @@ Wavefront::exec()
             "(pc: %#x; seqNum: %d)\n", computeUnit->cu_id, simdId, wfSlotId,
             wfDynId, ii->disassemble(), old_pc, ii->seqNum());
 
+    if (debug::GPUInstTestTrace) {
+        std::stringstream ss;
+        ss << "{ \"sn\": " << ii->seqNum() << ", \"wfDynId\": " << wfDynId
+            << ", \"pc\": \"" << std::hex << pc() << "\", \"asm\": \""
+            << ii->disassemble() << "\", " << "\"regs\": { " << std::dec;
+        ii->inst_trace += ss.str();
+
+        // Values *before* execution -- VCC and SCC are difficult to set and
+        // not be clobbered before the test instruction. But if needed, below
+        // comments show how to extract the values.
+        ss.str("");
+        ss << "\"preExec\": " << (int64_t)execMask().to_ullong() << ", ";
+        //computeUnit->srf[simdId]->logReg(this, TheGpuISA::REG_VCC_LO, ss,
+        //                                 false);
+        //computeUnit->srf[simdId]->logReg(this, TheGpuISA::REG_SCC, ss,
+        //                                 false);
+
+        ii->inst_trace += ss.str();
+    }
+
     ii->execute(ii);
+
+    if (debug::GPUInstTestTrace) {
+        // Values *after* execution -- Not sure if these are needed, but the
+        // comments show how they would be extracted.
+        std::stringstream ss;
+        //ss << "\"postExec\": " << execMask().to_ullong() << ", ";
+        //computeUnit->srf[simdId]->logReg(this, TheGpuISA::REG_VCC_LO, ss,
+        //                                 true);
+        //computeUnit->srf[simdId]->logReg(this, TheGpuISA::REG_SCC, ss, true);
+
+        ii->inst_trace += ss.str();
+
+        // For non-loads we have everything we need to print out
+        // Loads would be printed in GPUDynInst::computeAcc using this ending
+        // sequence and writeInstTestTrace call.
+        ii->inst_trace += "\"noendingcomma\": \"_\" }, \"test_type\": \""
+                        + ii->getTestType() + "\" } \n";
+
+        computeUnit->shader->writeInstTestTrace(ii->inst_trace);
+    }
+
     // delete the dynamic instruction from the pipeline map
     computeUnit->deleteFromPipeMap(this);
     // update the instruction stats in the CU

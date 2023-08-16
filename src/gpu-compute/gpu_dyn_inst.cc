@@ -32,6 +32,7 @@
 #include "gpu-compute/gpu_dyn_inst.hh"
 
 #include "debug/GPUInst.hh"
+#include "debug/GPUInstTestTrace.hh"
 #include "debug/GPUMem.hh"
 #include "gpu-compute/gpu_static_inst.hh"
 #include "gpu-compute/scalar_register_file.hh"
@@ -936,6 +937,37 @@ GPUDynInst::resolveFlatSegment(const VectorMask &mask)
             }
         }
     }
+}
+
+std::string
+GPUDynInst::getTestType() const
+{
+    // For GPU instruction test traces, print the type of test harness that
+    // should be used for this instruction. By default, do not test the
+    // instruction. This handles things like branches which are not needed
+    // for dynamic tracing.
+    std::string test_type = "do_not_test";
+
+    // Limiting to ALU instructions for now
+    if (isVector() && isALU()) {
+        test_type = "v";
+        if (writesExec()) {
+            test_type += "x";
+        }
+        if (writesVCC()) {
+            test_type += "f";
+        }
+    } else if (isScalar() && isALU()) {
+        test_type = "s";
+        if (writesExec()) {
+            test_type += "x";
+        }
+        if (writesSCC()) {
+            test_type += "f";
+        }
+    }
+
+    return test_type;
 }
 
 TheGpuISA::ScalarRegU32
