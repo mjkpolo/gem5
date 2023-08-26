@@ -3188,7 +3188,7 @@ namespace VegaISA
         &Decoder::decode_invalid,
         &Decoder::decode_invalid,
         &Decoder::decode_invalid,
-        &Decoder::decode_invalid,
+        &Decoder::decode_OP_VOP1__V_GEM5_PRINT_REG,
         &Decoder::decode_invalid,
         &Decoder::decode_invalid,
         &Decoder::decode_invalid,
@@ -13077,6 +13077,12 @@ namespace VegaISA
         fatal("Invalid opcode encountered: %#x\n", iFmt->imm_u32);
 
         return nullptr;
+    }
+
+    GPUStaticInst*
+    Decoder::decode_OP_VOP1__V_GEM5_PRINT_REG(MachInst iFmt)
+    {
+        return new Inst_VOP1__V_GEM5_PRINT_REG(&iFmt->iFmt_VOP1);
     }
 } // namespace VegaISA
 } // namespace gem5

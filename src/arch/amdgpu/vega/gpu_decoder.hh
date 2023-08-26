@@ -1600,6 +1600,8 @@ namespace VegaISA
         GPUStaticInst* subDecode_OP_VOPC(MachInst);
         GPUStaticInst* subDecode_OP_VOP3P(MachInst);
         GPUStaticInst* decode_invalid(MachInst);
+
+        GPUStaticInst* decode_OP_VOP1__V_GEM5_PRINT_REG(MachInst);
     };
 
     /*

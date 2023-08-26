@@ -45791,5 +45791,40 @@ namespace VegaISA
     {
         panicUnimplemented();
     } // execute
+    // --- Inst_VOP1__V_GEM5_PRINT_REG class methods ---
+
+    Inst_VOP1__V_GEM5_PRINT_REG::Inst_VOP1__V_GEM5_PRINT_REG(InFmt_VOP1 *iFmt)
+        : Inst_VOP1(iFmt, "v_gem5_print_reg")
+    {
+        setFlag(ALU);
+    } // Inst_VOP1__V_GEM5_PRINT_REG
+
+    Inst_VOP1__V_GEM5_PRINT_REG::~Inst_VOP1__V_GEM5_PRINT_REG()
+    {
+    } // ~Inst_VOP1__V_GEM5_PRINT_REG
+
+    void
+    Inst_VOP1__V_GEM5_PRINT_REG::execute(GPUDynInstPtr gpuDynInst)
+    {
+        Wavefront *wf = gpuDynInst->wavefront();
+        ConstVecOperandU32 src(gpuDynInst, instData.SRC0);
+
+        // Note vdst is unused. We should in fact not change it, otherwise
+        // we have to tell the compiler it will clobber that register.
+
+        src.readSrc();
+
+        if (instData.SRC0 > 0xff) {
+            printf("v%d = {", instData.SRC0 & 0xff);
+            for (int lane = 0; lane < NumVecElemPerVecReg; ++lane) {
+                if (wf->execMask(lane)) {
+                    printf("[%d]: %x ", lane, src[lane]);
+                }
+            }
+            printf("}\n");
+        } else {
+            printf("s%d = { %x }\n", instData.SRC0, src[0]);
+        }
+    } // execute
 } // namespace VegaISA
 } // namespace gem5

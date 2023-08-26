@@ -43403,6 +43403,38 @@ namespace VegaISA
 
         void execute(GPUDynInstPtr) override;
     }; // Inst_FLAT__FLAT_ATOMIC_DEC_X2
+
+    class Inst_VOP1__V_GEM5_PRINT_REG : public Inst_VOP1
+    {
+      public:
+        Inst_VOP1__V_GEM5_PRINT_REG(InFmt_VOP1*);
+        ~Inst_VOP1__V_GEM5_PRINT_REG();
+
+        int
+        getNumOperands() override
+        {
+            return numDstRegOperands() + numSrcRegOperands();
+        } // getNumOperands
+
+        int numDstRegOperands() override { return 1; }
+        int numSrcRegOperands() override { return 1; }
+
+        int
+        getOperandSize(int opIdx) override
+        {
+            switch (opIdx) {
+              case 0: //src
+                return 4;
+              case 1: //vdst
+                return 4;
+              default:
+                fatal("op idx %i out of bounds\n", opIdx);
+                return -1;
+            }
+        } // getOperandSize
+
+        void execute(GPUDynInstPtr) override;
+    }; // Inst_VOP1__V_GEM5_PRINT_REG
 } // namespace VegaISA
 } // namespace gem5
 
