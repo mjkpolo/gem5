@@ -28,6 +28,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from system.amdgpu import *
+from system.virtio import *
 
 from m5.util import panic
 
@@ -98,6 +99,9 @@ def makeGpuFSSystem(args):
     ]
     if ObjectList.is_kvm_cpu(TestCPUClass):
         system.kvm_vm = KvmVM()
+
+    # Connect 9p to mount host from gem5
+    attach9p(system)
 
     # Create AMDGPU and attach to southbridge
     shader = createGPU(system, args)
