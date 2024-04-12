@@ -1,4 +1,14 @@
-# Copyright 2022 Google LLC
+# Copyright (c) 2024 Arm Limited
+# All rights reserved.
+#
+# The license below extends only to copyright in the software and shall
+# not be construed as granting a license to any other intellectual
+# property including but not limited to intellectual property relating
+# to a hardware implementation of the functionality of the software
+# licensed hereunder.  You may use the software subject to the license
+# terms below provided that you ensure that this notice is replicated
+# unmodified and in its entirety in all distributions of the software,
+# modified or unmodified, in source code or in binary form.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -23,32 +33,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-mainmenu "$(MAIN_MENU_TEXT)"
+from m5.objects.PartitioningPolicies import PartitionManager
 
-config BATCH
-    bool "Use batch pool for build and test"
-    default n
 
-config BATCH_CMD
-    string "Batch pool submission command name"
-    default "qdo"
-    depends on BATCH
-
-config M5_BUILD_CACHE
-    string "Cache built objects in this directory"
-    default ""
-
-config USE_EFENCE
-    bool "Link with Electric Fence malloc debugger"
-    default n
-
-rsource "base/Kconfig"
-rsource "mem/ruby/Kconfig"
-rsource "learning_gem5/part3/Kconfig"
-rsource "proto/Kconfig"
-rsource "dev/net/Kconfig"
-rsource "arch/Kconfig"
-rsource "cpu/Kconfig"
-rsource "systemc/Kconfig"
-rsource "gpu-compute/Kconfig"
-rsource "test_objects/Kconfig"
+class MpamMSC(PartitionManager):
+    type = "MpamMSC"
+    abstract = True
+    cxx_header = "dev/arm/mpam.hh"
+    cxx_class = "gem5::mpam::MSC"

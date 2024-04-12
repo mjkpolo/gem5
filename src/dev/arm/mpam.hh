@@ -1,5 +1,15 @@
 /*
- * Copyright 2021 Google Inc.
+ * Copyright (c) 2024 Arm Limited
+ * All rights reserved.
+ *
+ * The license below extends only to copyright in the software and shall
+ * not be construed as granting a license to any other intellectual
+ * property including but not limited to intellectual property relating
+ * to a hardware implementation of the functionality of the software
+ * licensed hereunder.  You may use the software subject to the license
+ * terms below provided that you ensure that this notice is replicated
+ * unmodified and in its entirety in all distributions of the software,
+ * modified or unmodified, in source code or in binary form.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -25,63 +35,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __ARCH_SPARC_PSEUDO_INST_ABI_HH__
-#define __ARCH_SPARC_PSEUDO_INST_ABI_HH__
+#ifndef __DEV_ARM_MPAM_HH__
+#define __DEV_ARM_MPAM_HH__
 
-#include "arch/sparc/regs/int.hh"
-#include "cpu/thread_context.hh"
-#include "sim/guest_abi.hh"
-#include "sim/pseudo_inst.hh"
+#include "mem/cache/tags/partitioning_policies/partition_manager.hh"
 
-namespace gem5
+namespace gem5::mpam
 {
 
-struct SparcPseudoInstABI
+/**
+ * This class implements a simple MPAM Memory System Component (MSC)
+ * partitioning controller. For further info refer to:
+ * https://developer.arm.com/documentation/ddi0598/latest/
+ */
+class MSC : public partitioning_policy::PartitionManager
 {
-    using State = int;
+  public:
+    using partitioning_policy::PartitionManager::PartitionManager;
+
+    /**
+    * Helper function to retrieve PartitionID from a packet; Returns packet
+    * PartitionID if available or DEFAULT_PARTITION_ID if extention is not set
+    * @param pkt pointer to packet (PacketPtr)
+    * @return packet PartitionID.
+    */
+    uint64_t readPacketPartitionID(PacketPtr pkt) const override;
 };
 
-namespace guest_abi
-{
+} // namespace gem5::mpam
 
-template <typename T>
-struct Result<SparcPseudoInstABI, T>
-{
-    static void
-    store(ThreadContext *tc, const T &ret)
-    {
-        // This assumes that all pseudo ops have their return value set
-        // by the pseudo op instruction. This may need to be revisited if we
-        // modify the pseudo op ABI in util/m5/m5op_x86.S
-        tc->setReg(SparcISA::int_reg::O0, ret);
-    }
-};
-
-template <>
-struct Argument<SparcPseudoInstABI, uint64_t>
-{
-    static uint64_t
-    get(ThreadContext *tc, SparcPseudoInstABI::State &state)
-    {
-        panic_if(state >= 6, "Too many psuedo inst arguments.");
-        return tc->getReg(SparcISA::int_reg::o(state++));
-    }
-};
-
-template <>
-struct Argument<SparcPseudoInstABI, pseudo_inst::GuestAddr>
-{
-    using Arg = pseudo_inst::GuestAddr;
-
-    static Arg
-    get(ThreadContext *tc, SparcPseudoInstABI::State &state)
-    {
-        panic_if(state >= 6, "Too many psuedo inst arguments.");
-        return (Arg)tc->getReg(SparcISA::int_reg::o(state++));
-    }
-};
-
-} // namespace guest_abi
-} // namespace gem5
-
-#endif // __ARCH_SPARC_PSEUDO_INST_ABI_HH__
+#endif // __DEV_ARM_MPAM_HH__
