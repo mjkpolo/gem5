@@ -53,3 +53,4 @@ RUN apt -y install libnuma-dev
 # Install the ROCm-dkms source
 RUN apt -y install initramfs-tools
 RUN apt -y install rocm-dev
+RUN apt -y install gdb
