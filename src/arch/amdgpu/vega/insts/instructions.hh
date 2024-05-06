@@ -43851,6 +43851,11 @@ namespace VegaISA
     template <const int _delta, const int M, const int N, const int K,
               const int B, typename T1, typename T2>
     class Inst_VOP3P_MAI__V_MFMA : public Inst_VOP3P_MAI {
+
+    private:
+      static constexpr int gprs_a = M * K * B / 64, gprs_b = K * N * B / 64,
+                           gprs_c_d = M * N * B / 64;
+
     public:
       Inst_VOP3P_MAI__V_MFMA(InFmt_VOP3P_MAI *iFmt)
           : Inst_VOP3P_MAI(iFmt, (_delta == 2)
@@ -43874,13 +43879,13 @@ namespace VegaISA
       int getOperandSize(int opIdx) override {
         switch (opIdx) {
         case 0: // src0 "A"
-          return 4;
+          return 4*gprs_a;
         case 1: // src1 "B"
-          return 4;
+          return 4*gprs_b;
         case 2: // src2 "C"
-          return 16;
+          return 4*gprs_c_d;
         case 3: // dst
-          return 16;
+          return 4*gprs_c_d;
         default:
           fatal("op idx %i out of bounds\n", opIdx);
           return -1;
@@ -43907,14 +43912,10 @@ namespace VegaISA
             }
         }
 
-        constexpr int gprs_a = M * K * B / 64;
-        constexpr int gprs_b = K * N * B / 64;
-        constexpr int gprs_c = M * N * B / 64;
-        constexpr int gprs_d = M * N * B / 64;
         typename std::aligned_storage<sizeof(T1), alignof(T1)>::type _src0[gprs_a];
         typename std::aligned_storage<sizeof(T1), alignof(T1)>::type _src1[gprs_b];
-        typename std::aligned_storage<sizeof(T1), alignof(T1)>::type _src2[gprs_c];
-        typename std::aligned_storage<sizeof(T2), alignof(T2)>::type _vdst[gprs_d];
+        typename std::aligned_storage<sizeof(T1), alignof(T1)>::type _src2[gprs_c_d];
+        typename std::aligned_storage<sizeof(T2), alignof(T2)>::type _vdst[gprs_c_d];
         T1 *src0 = std::launder(reinterpret_cast<T1*>(&_src0));
         T1 *src1 = std::launder(reinterpret_cast<T1*>(&_src1));
         T1 *src2 = std::launder(reinterpret_cast<T1*>(&_src2));
@@ -43939,12 +43940,12 @@ namespace VegaISA
         }
 
         delta = isVectorReg(extData.SRC2) ? _delta : 0;
-        for (int i = 0; i < gprs_c; i++) {
+        for (int i = 0; i < gprs_c_d; i++) {
             new (&src2[i]) T1(gpuDynInst, extData.SRC2+acc_cd_off+i*delta);
             src2[i].readSrc();
         }
 
-        for (int i = 0; i < gprs_d; i++) {
+        for (int i = 0; i < gprs_c_d; i++) {
             new (&vdst[i]) T2(gpuDynInst, instData.VDST+acc_cd_off+i*_delta);
         }
 
@@ -44002,7 +44003,7 @@ namespace VegaISA
                 }
             }
 
-            for (int i = 0; i < gprs_d; ++i) {
+            for (int i = 0; i < gprs_c_d; ++i) {
                 vdst[i].write();
             }
         }
@@ -44012,10 +44013,10 @@ namespace VegaISA
         for (int i = 0; i < gprs_b; i++) {
             std::destroy_at(&src1[i]);
         }
-        for (int i = 0; i < gprs_c; i++) {
+        for (int i = 0; i < gprs_c_d; i++) {
             std::destroy_at(&src2[i]);
         }
-        for (int i = 0; i < gprs_d; i++) {
+        for (int i = 0; i < gprs_c_d; i++) {
             std::destroy_at(&vdst[i]);
         }
     } // execute
