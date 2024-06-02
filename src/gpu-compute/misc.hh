@@ -98,6 +98,9 @@ class WaitClass
     {
         return clockedObject->clockEdge() >= lookAheadAvail;
     }
+    bool inited() {
+        return clockedObject != NULL;
+    }
 
   private:
     // timestamp indicating when resource will be available

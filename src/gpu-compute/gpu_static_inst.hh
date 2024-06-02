@@ -66,6 +66,7 @@ class GPUStaticInst : public GPUStaticInstFlags
     void instAddr(int inst_addr) { _instAddr = inst_addr; }
     int instAddr() const { return _instAddr; }
     int nextInstAddr() const { return _instAddr + instSize(); }
+    virtual int passes() { return 0; }
 
     void instNum(int num) { _instNum = num; }
 

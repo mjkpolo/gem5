@@ -296,6 +296,8 @@ class GPUDynInst : public GPUExecContext
     bool isMAD() const;
     bool isMFMA() const;
 
+    bool isMFMA() const;
+
     // for FLAT memory ops. check the segment address
     // against the APE registers to see if it falls
     // within one of the APE ranges for LDS/SCRATCH/GPUVM.

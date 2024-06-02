@@ -40,6 +40,7 @@
 #include "gpu-compute/shader.hh"
 #include "gpu-compute/vector_register_file.hh"
 #include "gpu-compute/wavefront.hh"
+#include "misc.hh"
 #include "params/ComputeUnit.hh"
 
 namespace gem5
@@ -196,6 +197,23 @@ ScoreboardCheckStage::ready(Wavefront *w, nonrdytype_e *rdyStatus,
             return false;
         }
     }
+    if (ii->isMFMA()) {
+        if (ii->latency.inited()) {
+            if (!ii->latency.rdy()) {
+                printf("SCOREBOARD WAITING\n");
+                *rdyStatus = NRDY_MFMA;
+                return false;
+            }
+        } else {
+            ii->latency.init(ii->computeUnit());
+            ii->latency.set(ii->computeUnit()->clockPeriod() *
+                            ii->staticInstruction()->passes());
+            *rdyStatus = NRDY_MFMA;
+            return false;
+        }
+    }
+
+
     DPRINTF(GPUExec, "CU%d: WF[%d][%d]: Ready Inst : %s\n", computeUnit.cu_id,
             w->simdId, w->wfSlotId, ii->disassemble());
     *exeResType = mapWaveToExeUnit(w);
@@ -292,6 +310,7 @@ ScoreboardCheckStageStats::ScoreboardCheckStageStats(statistics::Group *parent)
     stallCycles.subname(NRDY_VGPR_NRDY, csprintf("VgprBusy"));
     stallCycles.subname(NRDY_SGPR_NRDY, csprintf("SgprBusy"));
     stallCycles.subname(INST_RDY, csprintf("InstrReady"));
+    stallCycles.subname(NRDY_MFMA, csprintf("MFMA"));
 }
 
 } // namespace gem5

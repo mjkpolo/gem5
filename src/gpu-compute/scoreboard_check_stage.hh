@@ -72,6 +72,7 @@ class ScoreboardCheckStage
         NRDY_VGPR_NRDY,
         NRDY_SGPR_NRDY,
         INST_RDY,
+        NRDY_MFMA,
         NRDY_CONDITIONS
     };
 
