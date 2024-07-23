@@ -44186,7 +44186,7 @@ namespace VegaISA
       ~Inst_VOP3P_MAI__V_MFMA() {}
 
       int passes() override {
-        return 4000;
+        return 37;
       }
 
       int getNumOperands() override {
